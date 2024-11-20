@@ -1,0 +1,77 @@
+{% extends 'hospital/doctor_base.html' %}
+{% load static %}
+{% block content %}
+{%include 'hospital/doctor_dashboard_cards.html'%}
+<br><br><br><br>
+<div class="container">
+  <div class="row">
+    <div class="panel panel-primary" style="margin-left:15%;">
+      <div class="panel-heading" style="text-align:center;">
+        <h6 class="panel-title">Recent Appointments For You</h6>
+      </div>
+      <table class="table table-hover" id="dev-table">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Picture</th>
+            <th>Description</th>
+            <th>Mobile</th>
+            <th>Address</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        
+        {% for a, p in appointments %}
+        {% comment %} <h4>Debugging Appointments Data</h4> {% endcomment %}
+        {% comment %} <pre>{{ a.__dict__ }}</pre> {% endcomment %}
+        <tr>
+          <td>{{ a.patientName }}</td>
+          <td>
+            <img src="{% static p.profile_pic.url %}" alt="Profile Pic" height="40px" width="40px" />
+          </td>
+          <td>{{ a.description }}</td>
+          <td>{{ p.mobile }}</td>
+          <td>{{ p.address }}</td>
+          <td>{{ a.appointmentDate }}</td>
+          <td>
+            <a href="{% url 'view_prescriptions' a.id a.patientId %}" class="btn btn-sm btn-info">
+              <i class="fa fa-eye"></i> View
+            </a>
+            <a href="{% url 'add_prescription' a.id a.patientId %}" class="btn btn-sm btn-success">
+              <i class="fa fa-plus"></i> Add
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+      
+      {% comment %} <table class="table table-hover" id="dev-table">
+        <thead>
+          <tr>
+            <th>Patient Name</th>
+            <th>Picture</th>
+            <th>Description</th>
+            <th>Mobile</th>
+            <th>Address</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        {% for a,p in appointments %}
+        <tr>
+          <td>{{a.patientName}}</td>
+          <td> <img src="{% static p.profile_pic.url %}" alt="Profile Pic" height="40px" width="40px" /></td>
+          <td>{{a.description}}</td>
+          <td>{{p.mobile}}</td>
+          <td>{{p.address}}</td>
+          <td>{{a.appointmentDate}}</td>
+        </tr>
+        {% endfor %}
+      </table> {% endcomment %}
+
+    </div>
+  </div>
+</div>
+
+
+{% endblock content %}

@@ -1,0 +1,197 @@
+{% extends 'hospital/pharmacist_base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+html, body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+#content {
+  flex: 1; /* Ensures the content takes up remaining space */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+footer {
+  background-color: black;
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+  position: relative; /* Default footer behavior */
+  bottom: 0;
+  width: 100%;
+}
+
+
+
+</style>
+
+<!-- Add a welcome message and quick links -->
+<div id="content">
+<h1>Welcome, {{ user.username }}</h1>
+<br><br>
+<div class="container">
+  <div class="row">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <h5 class="card-title">Manage Drugs</h5>
+          <p class="card-text">
+            Add, delete, or update the inventory of drugs.
+          </p>
+          <a href="{% url 'manage_drugs' %}" class="btn btn-primary">
+            Manage Drugs
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <h5 class="card-title">Generate Invoice</h5>
+          <p class="card-text">Create and manage invoices for patients.</p>
+          <a href="{% url 'generate_invoice' %}" class="btn btn-primary">
+            Generate Invoice
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<br /><br />
+
+<!-- Dropdown to Select Patient -->
+{% comment %} <div class="container">
+  <h3>Select Patient to View Prescriptions</h3>
+  <form method="GET" action="{% url 'view_prescriptions' 0 0 %}">
+    <div class="form-group">
+      <label for="patient">Select Patient:</label>
+      <select name="patient_id" id="patient" class="form-control">
+        {% for patient in patients %}
+        <option value="{{ patient.id }}">{{ patient.user.first_name }} {{ patient.user.last_name }}</option>
+        {% empty %}
+        <option>No patients with prescriptions</option>
+        {% endfor %}
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">View Prescriptions</button>
+  </form>
+</div> {% endcomment %}
+
+<br /><br />
+
+
+<div class="container">
+  <h3>View Prescription by Patient ID</h3>
+  <form id="prescriptionForm">
+      <div class="form-group">
+          <label for="patientId">Enter Patient ID:</label>
+          <input type="text" id="patientId" class="form-control" required>
+      </div>
+      <button type="button" class="btn btn-primary" onclick="fetchPrescription()">View Prescription</button>
+  </form>
+
+  <div id="prescriptionDetails" style="margin-top: 20px;">
+      <h4>Prescription Details:</h4>
+      <table class="table table-bordered">
+          <thead>
+              <tr>
+                  {% comment %} <th>Prescription ID</th> {% endcomment %}
+                  <th>Drug Name</th>
+                  <th>Dosage</th>
+                  <th>Doctor Name</th>
+                  <th>Date</th>
+              </tr>
+          </thead>
+          <tbody id="prescriptionTableBody">
+              <!-- Prescription data will be inserted here dynamically -->
+          </tbody>
+      </table>
+  </div>
+</div>
+
+
+
+<script>
+  function fetchPrescription() {
+      const patientId = document.getElementById("patientId").value;
+      if (!patientId) {
+          alert("Please enter a valid Patient ID");
+          return;
+      }
+
+      fetch(`/get-prescription-by-patient/?patient_id=${patientId}`)
+          .then(response => response.json())
+          .then(data => {
+              const tableBody = document.getElementById("prescriptionTableBody");
+              tableBody.innerHTML = ""; // Clear previous data
+
+              if (data.prescriptions) {
+                  data.prescriptions.forEach(prescription => {
+                      const row = `<tr>
+                          {% comment %} <td></td> {% endcomment %}
+                          <td>${prescription.drug_name}</td>
+                          <td>${prescription.dosage}</td>
+                          <td>${prescription.doctor_name}</td>
+                          <td>${prescription.date}</td>
+                      </tr>`;
+                      tableBody.innerHTML += row;
+                  });
+              } else {
+                  tableBody.innerHTML = `<tr><td colspan="5">${data.error}</td></tr>`;
+              }
+          })
+          .catch(error => console.error("Error fetching prescriptions:", error));
+  }
+</script>
+
+
+<br /><br />
+
+
+<!-- Recent Prescriptions Table -->
+<!-- <div class="container">
+  <div class="row">
+    <div class="panel panel-primary" style="margin-left: 15%">
+      <div class="panel-heading" style="text-align: center">
+        <h6 class="panel-title">Recent Prescriptions Assigned to You</h6>
+      </div>
+      <table class="table table-hover" id="prescriptions-table">
+        <thead>
+          <tr>
+            <th>Prescription ID</th>
+            <th>Patient Name</th>
+            <th>Drug Name</th>
+            <th>Dosage</th>
+            <th>Doctor Name</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for prescription in prescriptions %}
+          <tr>
+            <td>{{ prescription.id }}</td>
+            <td>{{ prescription.patient.username }}</td>
+            <td>{{ prescription.drug.name }}</td>
+            <td>{{ prescription.dosage }}</td>
+            <td>{{ prescription.doctor.username }}</td>
+            <td>{{ prescription.date }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div> -->
+</div>
+
+{% include "hospital/footer.html" %}
+{% endblock content %}

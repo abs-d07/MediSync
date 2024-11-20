@@ -1,0 +1,67 @@
+{% extends 'hospital/doctor_base.html' %}
+{% block content %}
+<div class="container">
+    <h3>Add Prescription for {{ patient.user.first_name }}</h3>
+    <form id="prescription-form" method="POST">
+        {% csrf_token %}
+        <table class="table" id="prescription-table">
+            <thead>
+                <tr>
+                    <th>Drug</th>
+                    <th>Dosage</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Dynamic rows will be added here -->
+            </tbody>
+        </table>
+        <button type="button" id="add-row-btn" class="btn btn-primary">Add Drug</button>
+        <button type="submit" class="btn btn-success">Submit Prescription</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const addRowButton = document.getElementById("add-row-btn");
+        const prescriptionTable = document.getElementById("prescription-table").querySelector("tbody");
+
+        addRowButton.addEventListener("click", function () {
+            const newRow = document.createElement("tr");
+
+            newRow.innerHTML = `
+                <td>
+                    <select name="drug[]" class="form-control" required>
+                        {% for drug in drugs %}
+                        <option value="{{ drug.id }}">{{ drug.name }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>
+                    <input type="text" name="dosage[]" class="form-control" placeholder="Dosage" required>
+                </td>
+                <td>
+                    <button type="button" class="btn btn-danger remove-row-btn">Remove</button>
+                </td>
+            `;
+
+            prescriptionTable.appendChild(newRow);
+
+            // Add event listener for remove button
+            newRow.querySelector(".remove-row-btn").addEventListener("click", function () {
+                newRow.remove();
+            });
+        });
+    });
+</script>
+{% endblock %}
+{% comment %} {% extends 'hospital/doctor_base.html' %}
+{% block content %}
+<h3>Add Prescription for {{ patient.user.first_name }}</h3>
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Add Prescription</button>
+</form>
+{% endblock %} {% endcomment %}
+

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+{% load widget_tweaks %}
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>Pharmacist Login</title>
+  <style>
+    /* Similar CSS as patientlogin.html */
+  </style>
+</head>
+
+<body>
+  {% include "hospital/navbar.html" %}
+  <br><br><br><br>
+
+  <form method="post">
+    {% csrf_token %}
+    <div class="container register-form">
+      <div class="form">
+        <div class="note">
+          <p>Pharmacist Login Page</p>
+        </div>
+
+        <div class="form-content">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                {% render_field form.username class="form-control" placeholder="Username" %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="form-group">
+                {% render_field form.password class="form-control" placeholder="Password" %}
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btnSubmit">Login</button>
+          <div class="text-center">Don't have an account? <a href="pharmacistsignup">Signup here</a></div>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  {% include "hospital/footer.html" %}
+</body>
+
+</html>

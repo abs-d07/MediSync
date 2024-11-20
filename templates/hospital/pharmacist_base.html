@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>MediSync - Pharmacist</title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  {% comment %} <style>
+
+
+    /* Include styles from doctor_base.html */
+    body {
+      padding-left: 240px;
+    }
+
+    main {
+      position: relative;
+      height: 100vh;
+    }
+
+    .menu {
+      background: #5bc995;
+      height: 100vh;
+      width: 240px;
+      position: fixed;
+      top: 0px;
+      left: 0;
+      z-index: 5;
+      overflow: visible;
+      /* outline: none; */
+    }
+
+    .menu .avatar {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 2em 0.5em;
+  text-align: center;
+  height: auto; /* Allow the height to adjust automatically */
+  overflow: visible; /* Prevent clipping */
+  position: relative; /* Ensure it layers properly */
+}
+
+.menu .avatar img {
+  width: 120px; /* Ensure the image has a consistent size */
+  height: 120px; /* Maintain square proportions */
+  border-radius: 50%;
+  overflow: visible; /* Ensure the image isn't clipped */
+  border: 4px solid #ffea92;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+  object-fit: cover; /* Ensures proper fit without distortion */
+}
+
+
+    /* .menu .avatar {
+      background: rgba(0, 0, 0, 0.1);
+      padding: 3em 0.5em;
+      text-align: center;
+    }
+
+    .menu .avatar img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid #ffea92;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+      object-fit: cover;
+    } */
+
+    .menu .avatar h2 {
+      font-weight: normal;
+      margin-top: 1em;
+      margin-bottom: 0;
+    }
+
+    .menu ul {
+      list-style: none;
+      padding: 0.5em 0;
+      margin: 0;
+    }
+
+    .menu ul li {
+      padding: 0.5em 1em 0.5em 3em;
+      font-size: 0.95em;
+      font-weight: regular;
+      background-repeat: no-repeat;
+      background-position: left 15px center;
+      background-size: auto 20px;
+      transition: all 0.15s linear;
+      cursor: pointer;
+    }
+
+    .menu ul li:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  </style> {% endcomment %}
+  <style>
+    body {
+      padding-left: 240px;
+    }
+  
+    .menu {
+      background: #5bc995;
+      height: 100vh;
+      width: 240px;
+      position: fixed;
+      top: 0px;
+      left: 0;
+      z-index: 5;
+      outline: none;
+      top: 50px;
+    }
+  
+    .menu .avatar {
+      padding-top: 20px;
+      background: rgba(0, 0, 0, 0.1);
+      padding: 2em 0.5em;
+      text-align: center;
+    }
+  
+    .menu .avatar img {
+      width: 100px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 4px solid #ffea92;
+      box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+    }
+  
+    .menu .avatar h2 {
+      font-weight: normal;
+      margin-bottom: 0;
+    }
+  
+    .menu ul {
+      list-style: none;
+      padding: 0.5em 0;
+      margin: 0;
+    }
+  
+    .menu ul li {
+      padding: 0.5em 1em 0.5em 3em;
+      font-size: 0.95em;
+      font-weight: regular;
+      background-repeat: no-repeat;
+      background-position: left 15px center;
+      background-size: auto 20px;
+      transition: all 0.15s linear;
+      cursor: pointer;
+    }
+  
+    .menu ul li:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+  
+    .menu ul li:focus {
+      outline: none;
+    }
+  
+    .dashboard-header {
+      background-color: #337ab7;
+      color: white;
+      padding: 10px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  
+    .dashboard-content {
+      margin-left: 260px;
+      padding: 20px;
+    }
+  
+    .dashboard-card {
+      display: inline-block;
+      width: 30%;
+      margin: 10px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      text-align: center;
+      background-color: white;
+      box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+    }
+  
+    .dashboard-card h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+  
+    .dashboard-card a {
+      display: inline-block;
+      padding: 10px 20px;
+      background-color: #337ab7;
+      color: white;
+      border-radius: 5px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+  
+    .dashboard-card a:hover {
+      background-color: #285e8e;
+    }
+  
+    footer {
+      background-color: black;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+    }
+  </style>
+  
+</head>
+
+<body>
+  <nav class="menu" tabindex="0">
+    <header class="avatar">
+      <img src="/static/images/pharmacist.png" alt="Profile Pic" />
+      <!-- <img src="{% static pharmacist.profile_pic.url %}" alt="Profile Pic" /> -->
+      <br><br>
+      
+      <h6>Pharmacist</h6>
+      <h2>{{ request.user.first_name }}</h2>
+    </header>
+    <ul>
+      <li tabindex="0" class="icon-dashboard"> <a style="color:white; text-decoration:none;" href="/pharmacist-dashboard"><span>Dashboard</span></a> </li>
+      <li tabindex="0" class="icon-users"> <a style="color:white; text-decoration:none;" href="{% url 'manage_drugs' %}"><span>Manage Drugs</span></a></li>
+      <!-- {% comment %} <li tabindex="0" class="icon-calendar"> <a style="color:white; text-decoration:none;" href="{% url 'view_prescriptions' pharmacist.id pharmacist.patient.id %}"><span>View Prescriptions</span></a></li> {% endcomment %}
+      <li tabindex="0" class="icon-calendar">
+        {% if pharmacist and pharmacist.id and pharmacist.patient and pharmacist.patient.id %}
+        {% comment %} <a style="color:white; text-decoration:none;" href="{% url 'view_prescriptions' pharmacist.id pharmacist.patient.id %}">
+          <span>View Prescriptions</span> {% endcomment %}
+          <span style="color: red;">No Prescriptions Available</span>
+        </a>
+        {% else %}
+        <span style="color: red;">No Prescriptions Available</span>
+        {% endif %}
+      </li> -->
+      <li tabindex="0" class="icon-calendar"> <a style="color:white; text-decoration:none;" href="{% url 'generate_invoice' %}"><span>Generate Invoice</span></a></li>
+    </ul>
+  </nav>
+  <main>
+    <!-- nav start -->
+    <div class="bs-example">
+      <nav class="navbar navbar-expand-md navbar-dark fixed-top" style="background:#337AB7;">
+        <a href="/pharmacist-dashboard" class="navbar-brand">HOSPITAL MANAGEMENT</a>
+        <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbarCollapse">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+          <div class="navbar-nav" style=" margin-left: 90%;">
+            <a href="/logout" class="nav-item nav-link">Logout</a>
+          </div>
+        </div>
+      </nav>
+    </div>
+    <!-- nav end -->
+    <br><br><br><br>
+    <!-- content start-->
+    {% block content %}
+    {% endblock content %}
+    <!-- content end-->
+
+  </main>
+</body>
+</html>

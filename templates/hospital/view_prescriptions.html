@@ -1,0 +1,22 @@
+{% extends 'hospital/doctor_base.html' %}
+{% block content %}
+<h3>Prescriptions for {{ patient.user.first_name }}</h3>
+<table class="table table-hover">
+  <thead>
+    <tr>
+      <th>Drug Name</th>
+      <th>Dosage</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for prescription in prescriptions %}
+    <tr>
+      <td>{{ prescription.drug.name }}</td>
+      <td>{{ prescription.dosage }}</td>
+      <td>{{ prescription.date }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

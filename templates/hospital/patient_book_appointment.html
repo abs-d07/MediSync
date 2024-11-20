@@ -1,0 +1,153 @@
+{% extends 'hospital/patient_base.html' %} {% load widget_tweaks %} 
+{% block content %}
+
+<head>
+  <style media="screen">
+    a:link {
+      text-decoration: none;
+    }
+
+    .note {
+      text-align: center;
+      height: 80px;
+      background: -webkit-linear-gradient(left, #0072ff, #8811c5);
+      color: #fff;
+      font-weight: bold;
+      line-height: 80px;
+    }
+
+    .form-content {
+      padding: 5%;
+      border: 1px solid #ced4da;
+      margin-bottom: 2%;
+    }
+
+    .form-control {
+      border-radius: 1.5rem;
+    }
+   
+    .btnSubmit {
+      border: none;
+      border-radius: 1.5rem;
+      padding: 1%;
+      width: 20%;
+      cursor: pointer;
+      background: #0062cc;
+      color: #fff;
+    }
+
+    .menu {
+      top: 50px;
+    }
+  </style>
+
+  <link
+    href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
+    rel="stylesheet"
+    id="bootstrap-css"
+  />
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+</head>
+<br /><br />
+{% if message %}
+<script>
+  var a = "{{message}}";
+  alert(a);
+</script>
+
+{% endif %}
+
+<!------ add appointment page by patient ---------->
+<form method="post">
+  {% csrf_token %}
+  <div class="container register-form">
+    <div class="form">
+      <div class="note">
+        <p>Book Appointment Details</p>
+      </div>
+      <div class="form-content">
+        <div class="row">
+          <div class="col-md-12">
+            {% comment %} <div class="form-group" >
+              {{ appointmentForm.description }}
+            </div> {% endcomment %}
+            
+            <div class="form-group">
+              {% render_field appointmentForm.description class="form-control" placeholder="Description" %}
+            </div>
+            <!-- Doctor Selection -->
+            <div class="form-group">
+              <label for="doctorId">Doctor Name and Department</label>
+              <select
+                name="doctorId"
+                id="doctorId"
+                class="form-control"
+                required
+              >
+                <option value="">Select a doctor</option>
+                {% for doctor in doctors %}
+                <option value="{{ doctor.user.id }}">
+                  {{ doctor.user.first_name }} ({{ doctor.department }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <!-- Time Slot Selection -->
+            <div class="form-group">
+              <label for="time_slot">Available Time Slots</label>
+              <select name="time_slot"
+                id="time_slot"
+                class="form-control"
+                required
+              >
+                <option value="">Select a time slot</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btnSubmit">Book</button>
+      </div>
+    </div>
+  </div>
+</form>
+<!-- JavaScript for Dynamic Time Slot Loading -->
+<script>
+  document.getElementById("doctorId").addEventListener("change", function () {
+    const doctorId = this.value;
+    const timeSlotDropdown = document.getElementById("time_slot");
+
+    if (doctorId) {
+      timeSlotDropdown.innerHTML = '<option value="">Loading...</option>';
+
+      fetch(`/get-time-slots/?doctor_id=${doctorId}`)
+        .then(response => response.json())
+        .then(data => {
+          timeSlotDropdown.innerHTML = '';
+
+          if (data.time_slots.length > 0) {
+            data.time_slots.forEach(slot => {
+              if (slot.status === 0) {  // Only display available slots
+                const option = document.createElement("option");
+                option.value = slot.id;
+                option.textContent = `${slot.start_time} - ${slot.end_time}`;
+                timeSlotDropdown.appendChild(option);
+              }
+            });
+          } else {
+            const option = document.createElement("option");
+            option.textContent = "No available time slots";
+            timeSlotDropdown.appendChild(option);
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching time slots:", error);
+          timeSlotDropdown.innerHTML = '<option value="">Error loading time slots</option>';
+        });
+    } else {
+      timeSlotDropdown.innerHTML = '<option value="">Select a doctor first</option>';
+    }
+  });
+</script>
+{% endblock content %}

@@ -1,0 +1,55 @@
+{% extends 'hospital/doctor_base.html' %}
+{% block content %}
+
+<div class="container">
+    <h3>Add Weekly Time Slots</h3>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="from_time">From Time</label>
+            <input type="time" class="form-control" id="from_time" name="from_time" required>
+        </div>
+        <div class="form-group">
+            <label for="to_time">To Time</label>
+            <input type="time" class="form-control" id="to_time" name="to_time" required>
+        </div>
+        <button type="submit" class="btn btn-success">Generate Slots</button>
+    </form>
+
+    {% if slots %}
+    <h4>Generated Slots</h4>
+    <ul>
+        {% for start, end in slots %}
+        <li>{{ start }} - {{ end }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <hr>
+
+    <h4>Existing Time Slots</h4>
+    {% if existing_slots %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Date Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for slot in existing_slots %}
+                <tr>
+                    <td>{{ slot.start_time }}</td>
+                    <td>{{ slot.end_time }}</td>
+                    <td>{{ slot.date_created|date:"Y-m-d H:i" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No time slots have been created yet.</p>
+    {% endif %}
+
+
+</div>
+{% endblock %}
