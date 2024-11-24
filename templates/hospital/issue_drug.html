@@ -1,0 +1,238 @@
+{% extends 'hospital/pharmacist_base.html' %}
+{% block content %}
+<!-- container -->
+<style>
+    .invoice-box {
+      max-width: 800px;
+      margin: auto;
+      padding: 30px;
+      border: 1px solid #eee;
+      box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+      font-size: 16px;
+      line-height: 24px;
+      font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+      color: #555;
+    }
+    .invoice-box table {
+      width: 100%;
+      line-height: inherit;
+      text-align: left;
+    }
+
+    .invoice-box table td {
+      padding: 5px;
+      vertical-align: top;
+    }
+
+    .invoice-box table tr td:nth-child(2) {
+      text-align: right;
+    }
+
+    .invoice-box table tr.top table td {
+      padding-bottom: 20px;
+    }
+
+    .invoice-box table tr.top table td.title {
+      font-size: 45px;
+      line-height: 45px;
+      color: #333;
+    }
+
+    .invoice-box table tr.information table td {
+      padding-bottom: 40px;
+    }
+
+    .invoice-box table tr.heading td {
+      background: #eee;
+      border-bottom: 1px solid #ddd;
+      font-weight: bold;
+    }
+
+    .invoice-box table tr.details td {
+      padding-bottom: 20px;
+    }
+
+    .invoice-box table tr.item td {
+      border-bottom: 1px solid #eee;
+    }
+
+    .invoice-box table tr.item.last td {
+      border-bottom: none;
+    }
+
+    .invoice-box table tr.total td:nth-child(2) {
+      border-top: 2px solid #eee;
+      font-weight: bold;
+    }
+
+    @media only screen and (max-width: 600px) {
+      .invoice-box table tr.top table td {
+        width: 100%;
+        display: block;
+        text-align: center;
+      }
+
+      .invoice-box table tr.information table td {
+        width: 100%;
+        display: block;
+        text-align: center;
+      }
+    }
+        .rtl {
+      direction: rtl;
+      font-family: Tahoma, 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+    }
+
+    .rtl table {
+      text-align: right;
+    }
+
+    .rtl table tr td:nth-child(2) {
+      text-align: left;
+    }
+
+    .menu {
+      top: 50px;
+    }
+
+    .download {
+      text-align: center;
+      display: block;
+    }
+</style> 
+<br><br><br>  
+<div class="invoice-box" style="
+    text-align: center;">
+    <table cellpadding="0" cellspacing="0">
+        <tr class="top">
+          <td colspan="2">
+            <table>
+              <tr>
+                <td class="title">
+                  <h1>Hospital Management</h1>
+                </td>
+    
+                <td>
+    
+                  Admit Date: {{admitDate}}<br>
+                  Release Date: {{todayDate}}<br>
+                  Days Spent: {{day}}
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+    
+        <tr class="information">
+          <td colspan="2">
+            <table>
+              <tr>
+                <td>
+                  Patient Name : {{name}}<br>
+                  Patient Mobile : {{mobile}}<br>
+                  Patient Addres : {{address}}<br>
+                </td>
+    
+                <td>
+                  Doctor Name :<br>
+                  {{assignedDoctorName}}<br>
+    
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+    <h2>Issue Drugs for Patient ID: {{ patient_id }}</h2>
+    <form method="post" action="{% url 'issue-drug' patient_id %}">
+        {% csrf_token %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Drug Name</th>
+                    <th>Dosage</th>
+                    <th>Available Stock</th>
+                    <th>Issue Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prescription in prescriptions %}
+                <tr>
+                    <td>{{ prescription.drug.name }}</td>
+                    <td>{{ prescription.dosage }}</td>
+                    <td>{{ prescription.drug.quantity }}</td>
+                    <td>
+                        <input
+                            type="number"
+                            name="issued_quantity"
+                            min="1"
+                            max="{{ prescription.drug.quantity }}"
+                            class="form-control issue-quantity"
+                            data-price="{{ prescription.drug.price }}"
+                            oninput="updatePrice(this)"
+                            required
+                        >
+                        <input type="hidden" name="drug_id" value="{{ prescription.drug.id }}">
+                    </td>
+                    <td class="price">{{ prescription.drug.price }}</td>
+                    <td class="total-price">0</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="5">Grand Total</th>
+                    <th id="grand-total">0</th>
+                </tr>
+            </tfoot>
+        </table>
+        <button type="submit" class="btn btn-primary">Issue Drugs</button>
+    </form>
+</div>
+
+
+<script>
+    // function updatePrice(input) {
+    //     const row = input.closest("tr");
+    //     const priceCell = row.querySelector(".price");
+    //     const totalCell = row.querySelector(".total-price");
+    //     const grandTotalCell = document.getElementById("grand-total");
+
+    //     const pricePerUnit = parseFloat(input.dataset.price);
+    //     const issuedQuantity = parseInt(input.value || 0);
+
+    //     // Update the total price for the row
+    //     const rowTotal = pricePerUnit * issuedQuantity;
+    //     totalCell.textContent = rowTotal.toFixed(2);
+
+    //     // Update the grand total
+    //     let grandTotal = 0;
+    //     document.querySelectorAll(".total-price").forEach((cell) => {
+    //         grandTotal += parseFloat(cell.textContent || 0);
+    //     });
+    //     grandTotalCell.textContent = grandTotal.toFixed(2);
+    // }
+    function updatePrice(input) {
+        const row = input.closest("tr");
+        const priceCell = row.querySelector(".price");
+        const totalCell = row.querySelector(".total-price");
+        const grandTotalCell = document.getElementById("grand-total");
+
+        const pricePerUnit = parseFloat(input.dataset.price);
+        const issuedQuantity = parseInt(input.value || 0);
+
+        // Update the total price for the row
+        const rowTotal = pricePerUnit * issuedQuantity;
+        totalCell.textContent = rowTotal.toFixed(2);
+
+        // Update the grand total
+        let grandTotal = 0;
+        document.querySelectorAll(".total-price").forEach((cell) => {
+            grandTotal += parseFloat(cell.textContent || 0);
+        });
+        grandTotalCell.textContent = grandTotal.toFixed(2);
+    }
+</script>
+
+{% endblock %}

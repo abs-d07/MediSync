@@ -15,6 +15,12 @@ from datetime import datetime, timedelta
 from django.contrib import messages
 from django.utils import timezone
 from django.http import JsonResponse
+from django.utils.timezone import now
+from xhtml2pdf import pisa
+from django.template.loader import render_to_string
+from io import BytesIO
+from django.http import HttpResponse
+from itertools import zip_longest
 
 
 # Create your views here.
@@ -1307,4 +1313,180 @@ def get_prescription_by_patient(request):
             return JsonResponse({"prescriptions": prescriptions_data}, status=200)
         else:
             return JsonResponse({"error": "No prescriptions found for this patient"}, status=404)
+        
+@login_required(login_url='pharmacistlogin')
+@user_passes_test(is_pharmacist)
+def issue_drug_view(request, patient_id):
+    prescriptions = Prescription.objects.filter(patient_id=patient_id)
+    pharmacist = Pharmacist.objects.get(user=request.user)
 
+    if request.method == 'POST':
+        drug_ids = request.POST.getlist('drug_id')
+        issued_quantities = request.POST.getlist('issued_quantity')
+        total_amount = 0
+
+        prescription_quantity_pairs = []
+
+        for drug_id, issued_quantity in zip(drug_ids, issued_quantities):
+            drug = Drug.objects.get(id=drug_id)
+            prescription = prescriptions.filter(drug_id=drug_id).first()
+
+            # Validate issued quantity
+            if int(issued_quantity) > drug.quantity or int(issued_quantity) < int(prescription.dosage):
+                messages.error(request, f"Issue quantity for {drug.name} is invalid.")
+                return redirect('issue-drug', patient_id=patient_id)
+
+            # Update drug stock
+            drug.quantity -= int(issued_quantity)
+            drug.save()
+
+            # Calculate total amount
+            total_amount += int(issued_quantity) * float(drug.price)
+
+            # Add to prescription-quantity pairs
+            prescription_quantity_pairs.append((prescription, int(issued_quantity)))
+
+        # Create Invoice entry
+        invoice = Invoice.objects.create(
+            patient_id=patient_id,
+            pharmacist=pharmacist,
+            total_amount=total_amount,
+            date=now()
+        )
+
+        # Prepare context for PDF generation
+        pdf_context = {
+            'prescription_quantity_pairs': prescription_quantity_pairs,
+            'patient_id': patient_id,
+            'total_amount': total_amount,
+            'invoice_id': invoice.id,
+            'pharmacist': pharmacist,
+            'date': now(),
+        }
+
+        # Generate PDF
+        template = render_to_string('hospital/invoice_template.html', pdf_context)
+        response = BytesIO()
+        pdf = pisa.CreatePDF(BytesIO(template.encode("utf-8")), dest=response)
+        
+        if not pdf.err:
+            # Add Content-Disposition for file download
+            pdf_response = HttpResponse(response.getvalue(), content_type='application/pdf')
+            pdf_response['Content-Disposition'] = f'attachment; filename="Invoice_{invoice.id}.pdf"'
+            return pdf_response
+
+        messages.success(request, "Drugs issued successfully!")
+        return HttpResponseRedirect(reverse('pharmacist-dashboard'))
+
+    return render(request, 'hospital/issue_drug.html', {
+        'prescriptions': prescriptions,
+        'patient_id': patient_id,
+    })
+
+
+
+# def issue_drug_view(request, patient_id):
+#     prescriptions = Prescription.objects.filter(patient_id=patient_id)
+#     pharmacist = Pharmacist.objects.get(user=request.user)
+
+#     if request.method == 'POST':
+#         drug_ids = request.POST.getlist('drug_id')
+#         issued_quantities = request.POST.getlist('issued_quantity')
+#         total_amount = 0
+
+#         for drug_id, issued_quantity in zip(drug_ids, issued_quantities):
+#             drug = Drug.objects.get(id=drug_id)
+#             prescription = prescriptions.filter(drug_id=drug_id).first()
+
+#             # Validate issued quantity
+#             if int(issued_quantity) > drug.quantity or int(issued_quantity) < int(prescription.dosage):
+#                 messages.error(request, f"Issue quantity for {drug.name} is invalid.")
+#                 return redirect('issue-drug', patient_id=patient_id)
+
+#             # Update drug stock
+#             drug.quantity -= int(issued_quantity)
+#             drug.save()
+
+#             # Calculate total amount
+#             total_amount += int(issued_quantity) * float(drug.price)
+
+#         # Create Invoice entry
+#         invoice = Invoice.objects.create(
+#             patient_id=patient_id,
+#             pharmacist=pharmacist,
+#             total_amount=total_amount,
+#             date=now()
+#         )
+
+#         # Prepare context for PDF generation
+#         pdf_context = {
+#             'prescriptions': prescriptions,
+#             'patient_id': patient_id,
+#             'total_amount': total_amount,
+#             'issued_quantities': issued_quantities,
+#             'invoice_id': invoice.id,
+#             'pharmacist': pharmacist,
+#             'date': now(),
+#         }
+
+#         # Generate PDF
+#         template = render_to_string('hospital/invoice_template.html', pdf_context)
+#         response = BytesIO()
+#         pdf = pisa.CreatePDF(BytesIO(template.encode("utf-8")), dest=response)
+#         if not pdf.err:
+#             return HttpResponse(response.getvalue(), content_type='application/pdf')
+
+#         messages.success(request, "Drugs issued successfully!")
+#         return HttpResponseRedirect(reverse('pharmacist-dashboard'))
+
+#     return render(request, 'hospital/issue_drug.html', {
+#         'prescriptions': prescriptions,
+#         'patient_id': patient_id,
+#     })
+# def issue_drug_view(request, patient_id):
+#     prescriptions = Prescription.objects.filter(patient_id=patient_id)
+#     if request.method == 'POST':
+#         drug_ids = request.POST.getlist('drug_id')
+#         issued_quantities = request.POST.getlist('issued_quantity')
+
+#         for drug_id, issued_quantity in zip(drug_ids, issued_quantities):
+#             drug = Drug.objects.get(id=drug_id)
+#             prescription = prescriptions.filter(drug_id=drug_id).first()  # Use filter + first()
+
+#             if not prescription:
+#                 messages.error(request, f"No prescription found for drug {drug.name}.")
+#                 continue
+
+#             if int(issued_quantity) > drug.quantity or int(issued_quantity) < int(prescription.dosage):
+#                 messages.error(request, f"Issue quantity for {drug.name} is invalid.")
+#                 continue
+
+#             # Deduct the issued quantity from stock
+#             drug.quantity -= int(issued_quantity)
+#             drug.save()
+
+#             # Mark prescription as issued (optional)
+#             prescription.pharmacist = request.user.pharmacist
+#             prescription.save()
+
+#         messages.success(request, "Drugs issued successfully!")
+#         return redirect('generate_invoice')
+
+#     return render(request, 'hospital/issue_drug.html', {
+#         'prescriptions': prescriptions,
+#         'patient_id': patient_id,
+#     })
+
+@login_required(login_url='pharmacistlogin')
+@user_passes_test(is_pharmacist)
+def test_invoice(request):
+    # Dummy data for testing
+    pdf_context = {
+        'prescription_quantity_pairs': [],  # Add sample data here for testing
+        'patient_id': 1,
+        'total_amount': 500,
+        'invoice_id': 1,
+        'pharmacist': Pharmacist.objects.first(),
+        'date': now(),
+    }
+    return render(request, 'hospital/invoice_template.html', pdf_context)

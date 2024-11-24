@@ -45,9 +45,28 @@ footer {
           <p class="card-text">
             Add, delete, or update the inventory of drugs.
           </p>
-          <a href="{% url 'manage_drugs' %}" class="btn btn-primary">
-            Manage Drugs
+          <a href="{% url 'manage_drugs' %}" class="btn btn-primary"
+            >Manage Drugs</a
+          >
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body text-center">
+          <h5 class="card-title">View Prescriptions</h5>
+          <p class="card-text">Access prescriptions assigned to you.</p>
+          {% if prescription.patient and prescription.id %}
+          <a
+            {% comment %} href="{% url 'view_prescriptions' prescription.id prescription.patient.id %}" {% endcomment %}
+            <span class="text-muted">No Prescription Data</span>
+            class="btn btn-primary"
+          >
+            View Prescriptions
           </a>
+          {% else %}
+          <span class="text-muted">No Prescription Data</span>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -57,9 +76,9 @@ footer {
         <div class="card-body text-center">
           <h5 class="card-title">Generate Invoice</h5>
           <p class="card-text">Create and manage invoices for patients.</p>
-          <a href="{% url 'generate_invoice' %}" class="btn btn-primary">
-            Generate Invoice
-          </a>
+          <a href="{% url 'generate_invoice' %}" class="btn btn-primary"
+            >Generate Invoice</a
+          >
         </div>
       </div>
     </div>
@@ -97,6 +116,7 @@ footer {
           <input type="text" id="patientId" class="form-control" required>
       </div>
       <button type="button" class="btn btn-primary" onclick="fetchPrescription()">View Prescription</button>
+      <button type="button" class="btn btn-primary" onclick="issueDrugs(event)">Issue Drug</button>
   </form>
 
   <div id="prescriptionDetails" style="margin-top: 20px;">
@@ -121,6 +141,19 @@ footer {
 
 
 <script>
+function issueDrugs(event) {
+    event.preventDefault(); // Prevent the form from submitting
+    const patientId = document.getElementById("patientId").value;
+    if (!patientId) {
+        alert("Please enter a valid Patient ID");
+        return;
+    }
+    // Redirect to the issue-drug page
+    window.location.href = `/issue-drug/${patientId}/`;
+}
+
+
+
   function fetchPrescription() {
       const patientId = document.getElementById("patientId").value;
       if (!patientId) {

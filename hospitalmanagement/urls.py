@@ -51,6 +51,10 @@ urlpatterns = [
     path('admin-discharge-patient', views.admin_discharge_patient_view, name='admin-discharge-patient'),
     path('discharge-patient/<int:pk>', views.discharge_patient_view, name='discharge-patient'),
     path('download-pdf/<int:pk>', views.download_pdf_view, name='download-pdf'),
+    # path('download-drug-pdf/<int:pk>', views.download_drug_pdf_view, name='download-drug-pdf'),
+    path('issue-drug/<int:patient_id>/', views.issue_drug_view, name='issue-drug'),
+    path('test-invoice/', views.test_invoice, name='test-invoice'),
+
 
     path('admin-appointment', views.admin_appointment_view, name='admin-appointment'),
     path('admin-view-appointment', views.admin_view_appointment_view, name='admin-view-appointment'),
@@ -121,6 +125,7 @@ urlpatterns += [
     path("add-time-slots/", views.add_time_slots, name="add_time_slots"),
     path("edit-time-slots/", views.edit_time_slots, name="edit_time_slots"),
     path("get-time-slots/", views.get_time_slots, name="get_time_slots"),
+    path('issue-drug/<int:patient_id>/', views.issue_drug_view, name='issue-drug'),
     path('get-prescription-by-patient/', views.get_prescription_by_patient, name='get_prescription_by_patient'),
 ]
 

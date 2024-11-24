@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invoice</title>
+</head>
+<body>
+    <h1>Hospital Management - Invoice</h1>
+    <p><strong>Invoice ID:</strong> {{ invoice_id }}</p>
+    <p><strong>Patient ID:</strong> {{ patient_id }}</p>
+    <p><strong>Pharmacist:</strong> {{ pharmacist.name }}</p>
+    <p><strong>Date:</strong> {{ date }}</p>
+
+    <table border="1" style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th>Drug Name</th>
+                <th>Dosage</th>
+                <th>Issued Quantity</th>
+                <th>Price (per unit)</th>
+                <th>Total Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for prescription, quantity in prescription_quantity_pairs %}
+            <tr>
+                <td>{{ prescription.drug.name }}</td>
+                <td>{{ prescription.dosage }}</td>
+                <td>{{ quantity }}</td>
+                <td>{{ prescription.drug.price }}</td>
+                <td>{{ quantity|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Total Amount: {{ total_amount }}</h3>
+</body>
+</html>
