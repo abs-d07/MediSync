@@ -1,6 +1,6 @@
 
 # Hospital Management
-![developer](https://img.shields.io/badge/Developed%20By%20%3A-Sumit%20Kumar-red)
+![developer](https://img.shields.io/badge/Developed%20By%3A-%20Abbu%2C%20Abhisek%2C%20Harpreet%2C%20Sanika-blue)
 ---
 ## screenshots
 ### Homepage
